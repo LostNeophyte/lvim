@@ -176,7 +176,7 @@ void early_init(mparm_T *paramp)
   estack_init();
   cmdline_init();
   eval_init();          // init global variables
-  init_path(argv0 ? argv0 : "nvim");
+  init_path(argv0 ? argv0 : "lvim");
   init_normal_cmds();   // Init the table of Normal mode commands.
   runtime_init();
   highlight_init();
@@ -1853,7 +1853,7 @@ static void do_system_initialization(void)
   if (config_dirs != NULL) {
     const void *iter = NULL;
     const char path_tail[] = {
-      'n', 'v', 'i', 'm', PATHSEP,
+      'l', 'v', 'i', 'm', PATHSEP,
       's', 'y', 's', 'i', 'n', 'i', 't', '.', 'v', 'i', 'm', NUL
     };
     do {
@@ -1906,18 +1906,18 @@ static bool do_user_initialization(void)
     return do_exrc;
   }
 
-  char_u *init_lua_path = (char_u *)stdpaths_user_conf_subpath("init.lua");
-  char_u *user_vimrc = (char_u *)stdpaths_user_conf_subpath("init.vim");
+  char_u *init_lua_path = (char_u *)stdpaths_user_data_subpath("runtime"PATHSEPSTR"lua"PATHSEPSTR"lvim"PATHSEPSTR"init.lua");
+  // char_u *user_vimrc = (char_u *)stdpaths_user_conf_subpath("init.vim");
 
   // init.lua
   if (os_path_exists((char *)init_lua_path)
       && do_source((char *)init_lua_path, true, DOSO_VIMRC)) {
-    if (os_path_exists((char *)user_vimrc)) {
-      semsg(_("E5422: Conflicting configs: \"%s\" \"%s\""), init_lua_path,
-            user_vimrc);
-    }
+    // if (os_path_exists((char *)user_vimrc)) {
+    //   semsg(_("E5422: Conflicting configs: \"%s\" \"%s\""), init_lua_path,
+    //         user_vimrc);
+    // }
 
-    xfree(user_vimrc);
+    // xfree(user_vimrc);
     xfree(init_lua_path);
     do_exrc = p_exrc;
     return do_exrc;
@@ -1925,45 +1925,45 @@ static bool do_user_initialization(void)
   xfree(init_lua_path);
 
   // init.vim
-  if (do_source((char *)user_vimrc, true, DOSO_VIMRC) != FAIL) {
-    do_exrc = p_exrc;
-    if (do_exrc) {
-      do_exrc = (path_full_compare(VIMRC_FILE, (char *)user_vimrc, false, true) != kEqualFiles);
-    }
-    xfree(user_vimrc);
-    return do_exrc;
-  }
-  xfree(user_vimrc);
+  // if (do_source((char *)user_vimrc, true, DOSO_VIMRC) != FAIL) {
+  //   do_exrc = p_exrc;
+  //   if (do_exrc) {
+  //     do_exrc = (path_full_compare(VIMRC_FILE, (char *)user_vimrc, false, true) != kEqualFiles);
+  //   }
+  //   xfree(user_vimrc);
+  //   return do_exrc;
+  // }
+  // xfree(user_vimrc);
 
-  char *const config_dirs = stdpaths_get_xdg_var(kXDGConfigDirs);
-  if (config_dirs != NULL) {
-    const void *iter = NULL;
-    do {
-      const char *dir;
-      size_t dir_len;
-      iter = vim_env_iter(':', config_dirs, iter, &dir, &dir_len);
-      if (dir == NULL || dir_len == 0) {
-        break;
-      }
-      const char path_tail[] = { 'n', 'v', 'i', 'm', PATHSEP,
-                                 'i', 'n', 'i', 't', '.', 'v', 'i', 'm', NUL };
-      char *vimrc = xmalloc(dir_len + sizeof(path_tail) + 1);
-      memmove(vimrc, dir, dir_len);
-      vimrc[dir_len] = PATHSEP;
-      memmove(vimrc + dir_len + 1, path_tail, sizeof(path_tail));
-      if (do_source(vimrc, true, DOSO_VIMRC) != FAIL) {
-        do_exrc = p_exrc;
-        if (do_exrc) {
-          do_exrc = (path_full_compare(VIMRC_FILE, vimrc, false, true) != kEqualFiles);
-        }
-        xfree(vimrc);
-        xfree(config_dirs);
-        return do_exrc;
-      }
-      xfree(vimrc);
-    } while (iter != NULL);
-    xfree(config_dirs);
-  }
+  // char *const config_dirs = stdpaths_get_xdg_var(kXDGConfigDirs);
+  // if (config_dirs != NULL) {
+  //   const void *iter = NULL;
+  //   do {
+  //     const char *dir;
+  //     size_t dir_len;
+  //     iter = vim_env_iter(':', config_dirs, iter, &dir, &dir_len);
+  //     if (dir == NULL || dir_len == 0) {
+  //       break;
+  //     }
+  //     const char path_tail[] = { 'n', 'v', 'i', 'm', PATHSEP,
+  //                                'i', 'n', 'i', 't', '.', 'v', 'i', 'm', NUL };
+  //     char *vimrc = xmalloc(dir_len + sizeof(path_tail) + 1);
+  //     memmove(vimrc, dir, dir_len);
+  //     vimrc[dir_len] = PATHSEP;
+  //     memmove(vimrc + dir_len + 1, path_tail, sizeof(path_tail));
+  //     if (do_source(vimrc, true, DOSO_VIMRC) != FAIL) {
+  //       do_exrc = p_exrc;
+  //       if (do_exrc) {
+  //         do_exrc = (path_full_compare(VIMRC_FILE, vimrc, false, true) != kEqualFiles);
+  //       }
+  //       xfree(vimrc);
+  //       xfree(config_dirs);
+  //       return do_exrc;
+  //     }
+  //     xfree(vimrc);
+  //   } while (iter != NULL);
+  //   xfree(config_dirs);
+  // }
 
   if (execute_env("EXINIT") == OK) {
     do_exrc = p_exrc;

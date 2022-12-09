@@ -1,6 +1,6 @@
 set(CPACK_PACKAGE_NAME "Neovim")
 set(CPACK_PACKAGE_VENDOR "neovim.io")
-set(CPACK_PACKAGE_FILE_NAME "nvim")
+set(CPACK_PACKAGE_FILE_NAME "lvim")
 
 # From the GitHub About section
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Vim-fork focused on extensibility and usability.")
@@ -22,7 +22,7 @@ set(CPACK_RESOURCE_FILE_README ${PROJECT_SOURCE_DIR}/README.md)
 
 
 if(WIN32)
-  set(CPACK_PACKAGE_FILE_NAME "nvim-win64")
+  set(CPACK_PACKAGE_FILE_NAME "lvim-win64")
   set(CPACK_GENERATOR ZIP WIX)
 
   # WIX
@@ -40,11 +40,11 @@ if(WIN32)
   list(APPEND CPACK_WIX_EXTENSIONS WixUtilExtension)
   list(APPEND CPACK_WIX_PATCH_FILE ${CMAKE_CURRENT_LIST_DIR}/WixPatch.xml)
 elseif(APPLE)
-  set(CPACK_PACKAGE_FILE_NAME "nvim-macos")
+  set(CPACK_PACKAGE_FILE_NAME "lvim-macos")
   set(CPACK_GENERATOR TGZ)
   set(CPACK_PACKAGE_ICON ${CMAKE_CURRENT_LIST_DIR}/neovim.icns)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  set(CPACK_PACKAGE_FILE_NAME "nvim-linux64")
+  set(CPACK_PACKAGE_FILE_NAME "lvim-linux64")
   set(CPACK_GENERATOR TGZ DEB)
   set(CPACK_DEBIAN_PACKAGE_NAME "Neovim") # required
   set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Neovim.io") # required

@@ -32,11 +32,11 @@ foreach(PACKAGE ${PACKAGES})
     add_custom_command(OUTPUT "${GENERATED_PACKAGE_DIR}/${PACKNAME}/doc/tags"
       COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${PACKAGE} ${GENERATED_PACKAGE_DIR}/${PACKNAME}
-      COMMAND "${PROJECT_BINARY_DIR}/bin/nvim"
+      COMMAND "${PROJECT_BINARY_DIR}/bin/lvim"
         -u NONE -i NONE -e --headless -c "helptags doc" -c quit
       DEPENDS
-        nvim
-        nvim_runtime_deps
+        lvim
+        lvim_runtime_deps
       WORKING_DIRECTORY "${GENERATED_PACKAGE_DIR}/${PACKNAME}"
     )
 
@@ -48,7 +48,7 @@ foreach(PACKAGE ${PACKAGES})
 
     install_helper(
       FILES ${GENERATED_PACKAGE_DIR}/${PACKNAME}/doc/tags "${${PACKNAME}_DOC_NAMES}"
-      DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/nvim/runtime/pack/dist/opt/${PACKNAME}/doc)
+      DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/lvim/runtime/pack/dist/opt/${PACKNAME}/doc)
 
     list(APPEND GENERATED_PACKAGE_TAGS "${GENERATED_PACKAGE_DIR}/${PACKNAME}/doc/tags")
   endif()
@@ -66,18 +66,18 @@ add_custom_command(OUTPUT ${GENERATED_HELP_TAGS}
   COMMAND ${CMAKE_COMMAND} -E remove doc/*
   COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${PROJECT_SOURCE_DIR}/runtime/doc doc
-  COMMAND "${PROJECT_BINARY_DIR}/bin/nvim"
+  COMMAND "${PROJECT_BINARY_DIR}/bin/lvim"
     -u NONE -i NONE -e --headless -c "helptags ++t doc" -c quit
   DEPENDS
-    nvim
-    nvim_runtime_deps
+    lvim
+    lvim_runtime_deps
   WORKING_DIRECTORY "${GENERATED_RUNTIME_DIR}"
 )
 
 
-# TODO: This doesn't work. wait for "nvim -l" to land?
+# TODO: This doesn't work. wait for "lvim -l" to land?
 add_custom_target(doc_html
-  COMMAND "${PROJECT_BINARY_DIR}/bin/nvim"
+  COMMAND "${PROJECT_BINARY_DIR}/bin/lvim"
     -V1 -es --clean -c "lua require('scripts.gen_help_html').gen('./build/runtime/doc', './build/doc_html', nil, 'todo_commit_id')" -c "0cq"
   DEPENDS
     ${GENERATED_HELP_TAGS}
@@ -100,32 +100,32 @@ add_custom_target(
 
 install_helper(
   FILES ${GENERATED_HELP_TAGS} ${BUILDDOCFILES}
-  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/nvim/runtime/doc)
+  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/lvim/runtime/doc)
 
 install_helper(
   FILES ${GENERATED_SYN_VIM}
-  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/nvim/runtime/syntax/vim)
+  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/lvim/runtime/syntax/vim)
 
 if(NOT APPLE)
   install_helper(
-    FILES ${CMAKE_CURRENT_SOURCE_DIR}/nvim.desktop
+    FILES ${CMAKE_CURRENT_SOURCE_DIR}/lvim.desktop
     DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
 endif()
 
 install_helper(
-  FILES ${CMAKE_CURRENT_SOURCE_DIR}/nvim.png
+  FILES ${CMAKE_CURRENT_SOURCE_DIR}/lvim.png
   DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/128x128/apps)
 
 install_helper(
   FILES ${CMAKE_CURRENT_SOURCE_DIR}/neovim.ico
-  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/nvim/runtime)
+  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/lvim/runtime)
 
 globrecurse_wrapper(RUNTIME_PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR} *.awk *.sh *.bat)
 
 foreach(PROG ${RUNTIME_PROGRAMS})
   get_filename_component(BASEDIR ${PROG} DIRECTORY)
   install_helper(PROGRAMS ${PROG}
-                 DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/nvim/runtime/${BASEDIR})
+                 DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/lvim/runtime/${BASEDIR})
 endforeach()
 
 globrecurse_wrapper(RUNTIME_FILES ${CMAKE_CURRENT_SOURCE_DIR}
@@ -134,5 +134,5 @@ globrecurse_wrapper(RUNTIME_FILES ${CMAKE_CURRENT_SOURCE_DIR}
 foreach(F ${RUNTIME_FILES})
   get_filename_component(BASEDIR ${F} DIRECTORY)
   install_helper(FILES ${F}
-                 DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/nvim/runtime/${BASEDIR})
+                 DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/lvim/runtime/${BASEDIR})
 endforeach()

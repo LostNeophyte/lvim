@@ -11,7 +11,7 @@ if(POLICY CMP0092)
   cmake_policy(SET CMP0092 NEW)
 endif()
 
-project(nvim C)
+project(lvim C)
 
 if(POLICY CMP0075)
   cmake_policy(SET CMP0075 NEW)
@@ -469,13 +469,13 @@ if(TS_HAS_SET_ALLOCATOR)
 endif()
 
 # The unit test lib requires LuaJIT; it will be skipped if LuaJIT is missing.
-option(PREFER_LUA "Prefer Lua over LuaJIT in the nvim executable." OFF)
+option(PREFER_LUA "Prefer Lua over LuaJIT in the lvim executable." OFF)
 
 if(PREFER_LUA)
   find_package(Lua 5.1 EXACT REQUIRED)
   set(LUA_PREFERRED_INCLUDE_DIRS ${LUA_INCLUDE_DIR})
   set(LUA_PREFERRED_LIBRARIES ${LUA_LIBRARIES})
-  # Passive (not REQUIRED): if LUAJIT_FOUND is not set, nvim-test is skipped.
+  # Passive (not REQUIRED): if LUAJIT_FOUND is not set, lvim-test is skipped.
   find_package(LuaJit)
 else()
   find_package(LuaJit REQUIRED)
@@ -528,9 +528,9 @@ endif()
 find_package(LIBVTERM 0.3 REQUIRED)
 include_directories(SYSTEM ${LIBVTERM_INCLUDE_DIRS})
 
-option(CLANG_ASAN_UBSAN "Enable Clang address & undefined behavior sanitizer for nvim binary." OFF)
-option(CLANG_MSAN "Enable Clang memory sanitizer for nvim binary." OFF)
-option(CLANG_TSAN "Enable Clang thread sanitizer for nvim binary." OFF)
+option(CLANG_ASAN_UBSAN "Enable Clang address & undefined behavior sanitizer for lvim binary." OFF)
+option(CLANG_MSAN "Enable Clang memory sanitizer for lvim binary." OFF)
+option(CLANG_TSAN "Enable Clang thread sanitizer for lvim binary." OFF)
 
 if((CLANG_ASAN_UBSAN AND CLANG_MSAN)
     OR (CLANG_ASAN_UBSAN AND CLANG_TSAN)
@@ -624,7 +624,7 @@ endif()
 find_program(BUSTED_PRG NAMES busted busted.bat)
 find_program(BUSTED_LUA_PRG busted-lua)
 if(NOT BUSTED_OUTPUT_TYPE)
-  set(BUSTED_OUTPUT_TYPE "nvim")
+  set(BUSTED_OUTPUT_TYPE "lvim")
 endif()
 
 #
@@ -673,10 +673,10 @@ add_glob_target(
   )
 
 add_custom_target(lintcommit
-  COMMAND ${PROJECT_BINARY_DIR}/bin/nvim -u NONE -es -c [[lua require('scripts.lintcommit').main({trace=false})]]
+  COMMAND ${PROJECT_BINARY_DIR}/bin/lvim -u NONE -es -c [[lua require('scripts.lintcommit').main({trace=false})]]
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   VERBATIM)
-add_dependencies(lintcommit nvim)
+add_dependencies(lintcommit lvim)
 
 add_custom_target(lint)
 add_dependencies(lint check-single-includes lintc lintlua lintsh lintcommit lintuncrustify)
@@ -695,7 +695,7 @@ add_custom_target(format)
 add_dependencies(format formatc formatlua)
 
 install_helper(
-  FILES ${CMAKE_SOURCE_DIR}/src/man/nvim.1
+  FILES ${CMAKE_SOURCE_DIR}/src/man/lvim.1
   DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
 #
@@ -711,8 +711,8 @@ add_subdirectory(runtime)
 get_directory_property(GENERATED_HELP_TAGS DIRECTORY runtime DEFINITION GENERATED_HELP_TAGS)
 if(WIN32)
   install_helper(
-    FILES ${DEPS_PREFIX}/share/nvim-qt/runtime/plugin/nvim_gui_shim.vim
-    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/nvim-qt/runtime/plugin)
+    FILES ${DEPS_PREFIX}/share/lvim-qt/runtime/plugin/lvim_gui_shim.vim
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/lvim-qt/runtime/plugin)
 endif()
 
 # Setup some test-related bits.  We do this after going down the tree because we
@@ -727,9 +727,9 @@ if(BUSTED_PRG)
   set(TEST_TARGET_ARGS)
   list(APPEND TEST_TARGET_ARGS "USES_TERMINAL")
 
-  set(UNITTEST_PREREQS nvim-test unittest-headers)
-  set(FUNCTIONALTEST_PREREQS nvim printenv-test printargs-test shell-test pwsh-test streams-test tty-test ${GENERATED_HELP_TAGS})
-  set(BENCHMARK_PREREQS nvim tty-test)
+  set(UNITTEST_PREREQS lvim-test unittest-headers)
+  set(FUNCTIONALTEST_PREREQS lvim printenv-test printargs-test shell-test pwsh-test streams-test tty-test ${GENERATED_HELP_TAGS})
+  set(BENCHMARK_PREREQS lvim tty-test)
 
   check_lua_module(${LUA_PRG} "ffi" LUA_HAS_FFI)
   if(LUA_HAS_FFI)
@@ -752,7 +752,7 @@ if(BUSTED_PRG)
   endif()
 
   if(LUA_HAS_FFI)
-    set(TEST_LIBNVIM_PATH $<TARGET_FILE:nvim-test>)
+    set(TEST_LIBNVIM_PATH $<TARGET_FILE:lvim-test>)
   else()
     set(TEST_LIBNVIM_PATH "")
   endif()
@@ -767,7 +767,7 @@ if(BUSTED_PRG)
     COMMAND ${CMAKE_COMMAND}
       -DBUSTED_PRG=${BUSTED_PRG}
       -DLUA_PRG=${LUA_PRG}
-      -DNVIM_PRG=$<TARGET_FILE:nvim>
+      -DNVIM_PRG=$<TARGET_FILE:lvim>
       -DWORKING_DIR=${CMAKE_CURRENT_SOURCE_DIR}
       -DBUSTED_OUTPUT_TYPE=${BUSTED_OUTPUT_TYPE}
       -DTEST_DIR=${CMAKE_CURRENT_SOURCE_DIR}/test
@@ -783,7 +783,7 @@ if(BUSTED_PRG)
     COMMAND ${CMAKE_COMMAND}
       -DBUSTED_PRG=${BUSTED_PRG}
       -DLUA_PRG=${LUA_PRG}
-      -DNVIM_PRG=$<TARGET_FILE:nvim>
+      -DNVIM_PRG=$<TARGET_FILE:lvim>
       -DWORKING_DIR=${CMAKE_CURRENT_SOURCE_DIR}
       -DBUSTED_OUTPUT_TYPE=${BUSTED_OUTPUT_TYPE}
       -DTEST_DIR=${CMAKE_CURRENT_SOURCE_DIR}/test
@@ -801,7 +801,7 @@ if(BUSTED_LUA_PRG)
     COMMAND ${CMAKE_COMMAND}
       -DBUSTED_PRG=${BUSTED_LUA_PRG}
       -DLUA_PRG=${LUA_PRG}
-      -DNVIM_PRG=$<TARGET_FILE:nvim>
+      -DNVIM_PRG=$<TARGET_FILE:lvim>
       -DWORKING_DIR=${CMAKE_CURRENT_SOURCE_DIR}
       -DBUSTED_OUTPUT_TYPE=${BUSTED_OUTPUT_TYPE}
       -DTEST_DIR=${CMAKE_CURRENT_SOURCE_DIR}/test

@@ -114,10 +114,10 @@ char *get_xdg_home(const XDGVarType idx)
 #if defined(MSWIN)
     dir = concat_fnames_realloc(dir,
                                 ((idx == kXDGDataHome
-                                  || idx == kXDGStateHome) ? "nvim-data" : "nvim"),
+                                  || idx == kXDGStateHome) ? "lvim-data" : "lvim"),
                                 true);
 #else
-    dir = concat_fnames_realloc(dir, "nvim", true);
+    dir = concat_fnames_realloc(dir, "lvim", true);
 #endif
 
 #ifdef BACKSLASH_IN_FILENAME

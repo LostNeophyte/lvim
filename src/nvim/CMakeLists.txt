@@ -24,7 +24,7 @@ endif()
 
 set(GENERATOR_DIR ${CMAKE_CURRENT_LIST_DIR}/generators)
 set(GENERATED_DIR ${PROJECT_BINARY_DIR}/src/nvim/auto)
-set(BINARY_LIB_DIR ${PROJECT_BINARY_DIR}/lib/nvim/)
+set(BINARY_LIB_DIR ${PROJECT_BINARY_DIR}/lib/lvim/)
 set(API_DISPATCH_GENERATOR ${GENERATOR_DIR}/gen_api_dispatch.lua)
 set(API_UI_EVENTS_GENERATOR ${GENERATOR_DIR}/gen_api_ui_events.lua)
 set(GENERATOR_C_GRAMMAR ${GENERATOR_DIR}/c_grammar.lua)
@@ -442,11 +442,11 @@ endif()
 
 set(NVIM_EXEC_LINK_LIBRARIES ${NVIM_LINK_LIBRARIES} ${LUA_PREFERRED_LIBRARIES})
 
-add_executable(nvim ${NVIM_GENERATED_FOR_SOURCES} ${NVIM_GENERATED_FOR_HEADERS}
+add_executable(lvim ${NVIM_GENERATED_FOR_SOURCES} ${NVIM_GENERATED_FOR_HEADERS}
   ${NVIM_GENERATED_SOURCES} ${NVIM_SOURCES} ${NVIM_HEADERS}
   ${EXTERNAL_SOURCES} ${EXTERNAL_HEADERS})
 
-set_target_properties(nvim
+set_target_properties(lvim
   PROPERTIES
   EXPORT_COMPILE_COMMANDS ON)
 
@@ -454,40 +454,40 @@ if(${CMAKE_VERSION} VERSION_LESS 3.20)
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
 
-target_link_libraries(nvim ${NVIM_EXEC_LINK_LIBRARIES})
-install_helper(TARGETS nvim)
+target_link_libraries(lvim ${NVIM_EXEC_LINK_LIBRARIES})
+install_helper(TARGETS lvim)
 if(MSVC)
-  install(FILES $<TARGET_PDB_FILE:nvim> DESTINATION ${CMAKE_INSTALL_BINDIR} OPTIONAL)
+  install(FILES $<TARGET_PDB_FILE:lvim> DESTINATION ${CMAKE_INSTALL_BINDIR} OPTIONAL)
 endif()
 
-set_property(TARGET nvim APPEND PROPERTY
+set_property(TARGET lvim APPEND PROPERTY
              INCLUDE_DIRECTORIES ${LUA_PREFERRED_INCLUDE_DIRS})
-set_property(TARGET nvim PROPERTY ENABLE_EXPORTS TRUE)
+set_property(TARGET lvim PROPERTY ENABLE_EXPORTS TRUE)
 
 if(ENABLE_LTO)
   include(CheckIPOSupported)
   check_ipo_supported(RESULT IPO_SUPPORTED)
   if(IPO_SUPPORTED AND (NOT CMAKE_BUILD_TYPE MATCHES Debug))
-    set_property(TARGET nvim PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+    set_property(TARGET lvim PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
   endif()
 endif()
 
 if(WIN32)
-  # Copy DLLs and third-party tools to bin/ and install them along with nvim
-  add_custom_target(nvim_runtime_deps ALL
+  # Copy DLLs and third-party tools to bin/ and install them along with lvim
+  add_custom_target(lvim_runtime_deps ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_BINARY_DIR}/windows_runtime_deps/
       ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
   install(DIRECTORY ${PROJECT_BINARY_DIR}/windows_runtime_deps/
     DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-  add_custom_target(nvim_dll_deps DEPENDS nvim
+  add_custom_target(lvim_dll_deps DEPENDS lvim
     COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/windows_runtime_deps
     COMMAND ${CMAKE_COMMAND}
       "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"
-      -DBINARY="${PROJECT_BINARY_DIR}/bin/nvim${CMAKE_EXECUTABLE_SUFFIX}"
+      -DBINARY="${PROJECT_BINARY_DIR}/bin/lvim${CMAKE_EXECUTABLE_SUFFIX}"
       -DDST=${PROJECT_BINARY_DIR}/windows_runtime_deps
       -P ${PROJECT_SOURCE_DIR}/cmake/WindowsDllCopy.cmake)
-  add_dependencies(nvim_runtime_deps nvim_dll_deps)
+  add_dependencies(lvim_runtime_deps lvim_dll_deps)
 
   # A CMake script is used for copying the files to avoid the
   # "command line is too long" error that occurs when Ninja tries running
@@ -544,7 +544,7 @@ if(WIN32)
                       libGLESv2.dll
                       libstdc++-6.dll
                       libwinpthread-1.dll
-                      nvim-qt.exe
+                      lvim-qt.exe
                       opengl32sw.dll
                       Qt5Core.dll
                       Qt5Gui.dll
@@ -562,55 +562,55 @@ if(WIN32)
   add_custom_target(external_blobs
     COMMAND ${CMAKE_COMMAND} -P ${PROJECT_BINARY_DIR}/external_blobs.cmake)
   set_target_properties(external_blobs PROPERTIES FOLDER deps)
-  add_dependencies(nvim_runtime_deps external_blobs)
+  add_dependencies(lvim_runtime_deps external_blobs)
 else()
-  add_custom_target(nvim_runtime_deps)  # Stub target to avoid CMP0046.
+  add_custom_target(lvim_runtime_deps)  # Stub target to avoid CMP0046.
 endif()
-set_target_properties(nvim_runtime_deps PROPERTIES FOLDER deps)
+set_target_properties(lvim_runtime_deps PROPERTIES FOLDER deps)
 
 file(MAKE_DIRECTORY ${BINARY_LIB_DIR})
 
 # install treesitter parser if bundled
-if(EXISTS ${DEPS_PREFIX}/lib/nvim/parser)
-  glob_wrapper(TREESITTER_PARSERS ${DEPS_PREFIX}/lib/nvim/parser/*)
+if(EXISTS ${DEPS_PREFIX}/lib/lvim/parser)
+  glob_wrapper(TREESITTER_PARSERS ${DEPS_PREFIX}/lib/lvim/parser/*)
   foreach(parser_lib ${TREESITTER_PARSERS})
     file(COPY ${parser_lib} DESTINATION ${BINARY_LIB_DIR}/parser)
   endforeach()
 endif()
 
 install(DIRECTORY ${BINARY_LIB_DIR}
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/nvim/
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/lvim/
   USE_SOURCE_PERMISSIONS)
 
 add_library(
-  libnvim
+  liblvim
   STATIC
   EXCLUDE_FROM_ALL
   ${NVIM_SOURCES} ${NVIM_GENERATED_SOURCES}
   ${NVIM_HEADERS} ${NVIM_GENERATED_FOR_SOURCES} ${NVIM_GENERATED_FOR_HEADERS}
   ${EXTERNAL_SOURCES} ${EXTERNAL_HEADERS}
 )
-set_property(TARGET libnvim APPEND PROPERTY
+set_property(TARGET liblvim APPEND PROPERTY
              INCLUDE_DIRECTORIES ${LUA_PREFERRED_INCLUDE_DIRS})
 if(MSVC)
-  set(LIBNVIM_NAME libnvim)
+  set(LIBNVIM_NAME liblvim)
 else()
-  set(LIBNVIM_NAME nvim)
+  set(LIBNVIM_NAME lvim)
 endif()
 set_target_properties(
-  libnvim
+  liblvim
   PROPERTIES
     POSITION_INDEPENDENT_CODE ON
     OUTPUT_NAME ${LIBNVIM_NAME}
 )
-target_compile_options(libnvim PRIVATE -DMAKE_LIB)
+target_compile_options(liblvim PRIVATE -DMAKE_LIB)
 
 if(NOT LUAJIT_FOUND)
-  message(STATUS "luajit not found, skipping nvim-test (unit tests) target")
+  message(STATUS "luajit not found, skipping lvim-test (unit tests) target")
 else()
   set(NVIM_TEST_LINK_LIBRARIES ${NVIM_LINK_LIBRARIES} ${LUAJIT_LIBRARIES})
   add_library(
-    nvim-test
+    lvim-test
     MODULE
     EXCLUDE_FROM_ALL
     ${NVIM_SOURCES} ${NVIM_GENERATED_SOURCES}
@@ -618,22 +618,22 @@ else()
     ${EXTERNAL_SOURCES} ${EXTERNAL_HEADERS}
     ${UNIT_TEST_FIXTURES}
   )
-  target_link_libraries(nvim-test ${NVIM_TEST_LINK_LIBRARIES})
-  target_link_libraries(libnvim ${NVIM_TEST_LINK_LIBRARIES})
+  target_link_libraries(lvim-test ${NVIM_TEST_LINK_LIBRARIES})
+  target_link_libraries(liblvim ${NVIM_TEST_LINK_LIBRARIES})
   set_property(
-    TARGET nvim-test
+    TARGET lvim-test
     APPEND PROPERTY INCLUDE_DIRECTORIES ${LUAJIT_INCLUDE_DIRS}
   )
   set_target_properties(
-    nvim-test
+    lvim-test
     PROPERTIES
       POSITION_INDEPENDENT_CODE ON
   )
-  target_compile_options(nvim-test PRIVATE -DUNIT_TESTING)
+  target_compile_options(lvim-test PRIVATE -DUNIT_TESTING)
 endif()
 
 if(CLANG_ASAN_UBSAN)
-  message(STATUS "Enabling Clang address sanitizer and undefined behavior sanitizer for nvim.")
+  message(STATUS "Enabling Clang address sanitizer and undefined behavior sanitizer for lvim.")
   check_c_compiler_flag(-fno-sanitize-recover=all SANITIZE_RECOVER_ALL)
   if(SANITIZE_RECOVER_ALL)
     if(CI_BUILD)
@@ -650,17 +650,17 @@ if(CLANG_ASAN_UBSAN)
       set(SANITIZE_RECOVER -fno-sanitize-recover)      # Clang 3.5-
     endif()
   endif()
-  set_property(TARGET nvim APPEND PROPERTY COMPILE_OPTIONS ${SANITIZE_RECOVER} -fno-omit-frame-pointer -fno-optimize-sibling-calls -fsanitize=address -fsanitize=undefined -fsanitize-blacklist=${PROJECT_SOURCE_DIR}/src/.asan-blacklist)
-  set_property(TARGET nvim APPEND_STRING PROPERTY LINK_FLAGS "-fsanitize=address -fsanitize=undefined ")
+  set_property(TARGET lvim APPEND PROPERTY COMPILE_OPTIONS ${SANITIZE_RECOVER} -fno-omit-frame-pointer -fno-optimize-sibling-calls -fsanitize=address -fsanitize=undefined -fsanitize-blacklist=${PROJECT_SOURCE_DIR}/src/.asan-blacklist)
+  set_property(TARGET lvim APPEND_STRING PROPERTY LINK_FLAGS "-fsanitize=address -fsanitize=undefined ")
 elseif(CLANG_MSAN)
-  message(STATUS "Enabling Clang memory sanitizer for nvim.")
-  set_property(TARGET nvim APPEND PROPERTY COMPILE_OPTIONS -fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer -fno-optimize-sibling-calls)
-  set_property(TARGET nvim APPEND_STRING PROPERTY LINK_FLAGS "-fsanitize=memory -fsanitize-memory-track-origins ")
+  message(STATUS "Enabling Clang memory sanitizer for lvim.")
+  set_property(TARGET lvim APPEND PROPERTY COMPILE_OPTIONS -fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer -fno-optimize-sibling-calls)
+  set_property(TARGET lvim APPEND_STRING PROPERTY LINK_FLAGS "-fsanitize=memory -fsanitize-memory-track-origins ")
 elseif(CLANG_TSAN)
-  message(STATUS "Enabling Clang thread sanitizer for nvim.")
-  set_property(TARGET nvim APPEND PROPERTY COMPILE_OPTIONS -fsanitize=thread)
-  set_property(TARGET nvim APPEND PROPERTY COMPILE_OPTIONS -fPIE)
-  set_property(TARGET nvim APPEND_STRING PROPERTY LINK_FLAGS "-fsanitize=thread ")
+  message(STATUS "Enabling Clang thread sanitizer for lvim.")
+  set_property(TARGET lvim APPEND PROPERTY COMPILE_OPTIONS -fsanitize=thread)
+  set_property(TARGET lvim APPEND PROPERTY COMPILE_OPTIONS -fPIE)
+  set_property(TARGET lvim APPEND_STRING PROPERTY LINK_FLAGS "-fsanitize=thread ")
 endif()
 
 function(get_test_target prefix sfile relative_path_var target_var)

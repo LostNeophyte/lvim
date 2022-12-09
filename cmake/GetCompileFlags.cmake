@@ -10,7 +10,7 @@ function(get_compile_flags _compile_flags)
 
   # Get flags set by add_definitions().
   get_property(compile_definitions DIRECTORY PROPERTY COMPILE_DEFINITIONS)
-  get_target_property(compile_definitions_target nvim COMPILE_DEFINITIONS)
+  get_target_property(compile_definitions_target lvim COMPILE_DEFINITIONS)
   if(compile_definitions_target)
     list(APPEND compile_definitions ${compile_definitions_target})
     list(REMOVE_DUPLICATES compile_definitions)
@@ -28,7 +28,7 @@ function(get_compile_flags _compile_flags)
 
   # Get flags set by add_compile_options().
   get_property(compile_options DIRECTORY PROPERTY COMPILE_OPTIONS)
-  get_target_property(compile_options_target nvim COMPILE_OPTIONS)
+  get_target_property(compile_options_target lvim COMPILE_OPTIONS)
   if(compile_options_target)
     list(APPEND compile_options ${compile_options_target})
     list(REMOVE_DUPLICATES compile_options)

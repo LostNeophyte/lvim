@@ -43,21 +43,21 @@ if(HAVE_WORKING_LIBINTL AND GETTEXT_FOUND AND XGETTEXT_PRG AND ICONV_PRG)
     list(APPEND NVIM_RELATIVE_SOURCES ${RELATIVE_SRC})
   endforeach()
 
-  set(NVIM_POT ${CMAKE_CURRENT_BINARY_DIR}/nvim.pot)
+  set(NVIM_POT ${CMAKE_CURRENT_BINARY_DIR}/lvim.pot)
 
   list(SORT NVIM_RELATIVE_SOURCES)
   add_custom_command(
     OUTPUT ${NVIM_POT}
-    COMMAND $<TARGET_FILE:nvim> -u NONE -i NONE -n --headless --cmd "set cpo+=+"
+    COMMAND $<TARGET_FILE:lvim> -u NONE -i NONE -n --headless --cmd "set cpo+=+"
       -S ${CMAKE_CURRENT_SOURCE_DIR}/tojavascript.vim ${NVIM_POT} ${PROJECT_SOURCE_DIR}/runtime/optwin.vim
-    COMMAND ${XGETTEXT_PRG} -o ${NVIM_POT} --default-domain=nvim
+    COMMAND ${XGETTEXT_PRG} -o ${NVIM_POT} --default-domain=lvim
       --add-comments --keyword=_ --keyword=N_ --keyword=NGETTEXT:1,2
       -D ${CMAKE_CURRENT_SOURCE_DIR} -D ${CMAKE_CURRENT_BINARY_DIR}
       ${NVIM_RELATIVE_SOURCES} optwin.js
-    COMMAND $<TARGET_FILE:nvim> -u NONE -i NONE -n --headless --cmd "set cpo+=+"
+    COMMAND $<TARGET_FILE:lvim> -u NONE -i NONE -n --headless --cmd "set cpo+=+"
       -S ${CMAKE_CURRENT_SOURCE_DIR}/fixfilenames.vim ${NVIM_POT} ../../../runtime/optwin.vim
     VERBATIM
-    DEPENDS ${NVIM_SOURCES} nvim nvim_runtime_deps)
+    DEPENDS ${NVIM_SOURCES} lvim lvim_runtime_deps)
 
   set(LANGUAGE_MO_FILES)
   set(UPDATE_PO_TARGETS)
@@ -83,7 +83,7 @@ if(HAVE_WORKING_LIBINTL AND GETTEXT_FOUND AND XGETTEXT_PRG AND ICONV_PRG)
     set(poFile ${CMAKE_CURRENT_SOURCE_DIR}/${name}.po)
 
     add_custom_target(check-po-${name}
-      COMMAND $<TARGET_FILE:nvim> -u NONE -n -e
+      COMMAND $<TARGET_FILE:lvim> -u NONE -n -e
           -S ${CMAKE_CURRENT_SOURCE_DIR}/check.vim
           -c "if error == 0 | q | endif" -c cq ${poFile} ||
           ${CMAKE_COMMAND} -E echo "${name}.po failed the check."

@@ -957,7 +957,7 @@ char *vim_getenv(const char *name)
     if (vim_path == NULL) {
       vim_get_prefix_from_exepath(exe_name);
       if (append_path(exe_name,
-                      "share" _PATHSEPSTR "nvim" _PATHSEPSTR "runtime" _PATHSEPSTR,
+                      "share" _PATHSEPSTR "lvim" _PATHSEPSTR "runtime" _PATHSEPSTR,
                       MAXPATHL) == OK) {
         vim_path = exe_name;  // -V507
       }

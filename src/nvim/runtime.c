@@ -1378,7 +1378,7 @@ static inline size_t compute_double_env_sep_len(const char *const val, const siz
   return ret;
 }
 
-#define NVIM_SIZE (sizeof("nvim") - 1)
+#define NVIM_SIZE (sizeof("lvim") - 1)
 /// Add directories to a ENV_SEPCHAR-separated array from a colon-separated one
 ///
 /// Commas are escaped in process. To each item PATHSEP "nvim" is appended in
@@ -1417,7 +1417,7 @@ static inline char *add_env_sep_dirs(char *dest, const char *const val, const ch
       if (!after_pathsep(dest - 1, dest)) {
         *dest++ = PATHSEP;
       }
-      memmove(dest, "nvim", NVIM_SIZE);
+      memmove(dest, "lvim", NVIM_SIZE);
       dest += NVIM_SIZE;
       if (suf1 != NULL) {
         *dest++ = PATHSEP;
@@ -1473,11 +1473,11 @@ static inline char *add_dir(char *dest, const char *const dir, const size_t dir_
       *dest++ = PATHSEP;
     }
 #if defined(MSWIN)
-    size_t size = (type == kXDGDataHome ? sizeof("nvim-data") - 1 : NVIM_SIZE);
-    memmove(dest, (type == kXDGDataHome ? "nvim-data" : "nvim"), size);
+    size_t size = (type == kXDGDataHome ? sizeof("lvim-data") - 1 : NVIM_SIZE);
+    memmove(dest, (type == kXDGDataHome ? "lvim-data" : "lvim"), size);
     dest += size;
 #else
-    memmove(dest, "nvim", NVIM_SIZE);
+    memmove(dest, "lvim", NVIM_SIZE);
     dest += NVIM_SIZE;
 #endif
     if (suf1 != NULL) {
@@ -1507,7 +1507,7 @@ char *get_lib_dir(void)
   // Find library path relative to the nvim binary: ../lib/nvim/
   char exe_name[MAXPATHL];
   vim_get_prefix_from_exepath(exe_name);
-  if (append_path(exe_name, "lib" _PATHSEPSTR "nvim", MAXPATHL) == OK) {
+  if (append_path(exe_name, "lib" _PATHSEPSTR "lvim", MAXPATHL) == OK) {
     return xstrdup(exe_name);
   }
   return NULL;
@@ -1543,7 +1543,7 @@ char *runtimepath_default(bool clean_arg)
     data_len = strlen(data_home);
     if (data_len != 0) {
 #if defined(MSWIN)
-      size_t nvim_size = (sizeof("nvim-data") - 1);
+      size_t nvim_size = (sizeof("lvim-data") - 1);
 #else
       size_t nvim_size = NVIM_SIZE;
 #endif

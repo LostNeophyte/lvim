@@ -278,7 +278,7 @@ if(WIN32)
     INSTALL_COMMAND ${CMAKE_COMMAND} -E copy win32yank.exe ${DEPS_INSTALL_DIR}/bin)
 endif()
 
-# clean-shared-libraries removes ${DEPS_INSTALL_DIR}/lib/nvim/parser/c.dll,
+# clean-shared-libraries removes ${DEPS_INSTALL_DIR}/lib/lvim/parser/c.dll,
 # resulting in MSVC build failure in CI.
 if (MSVC)
   set(ALL_DEPS ${THIRD_PARTY_DEPS})
